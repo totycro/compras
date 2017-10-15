@@ -1,40 +1,45 @@
 module App.View.Homepage where
 
-import Prelude (show, const)
+import Prelude (const)
 
 import App.Events (Event(..))
-import App.State (State(..))
+import App.State (State(..), User(..))
 import Control.Bind (discard)
 import Data.Function (($))
+import Data.List (List(..), (:), foldl)
 import Pux.DOM.HTML (HTML)
 import Pux.DOM.Events (onClick)
-import Text.Smolder.HTML (a, div, h1, span, button)
-import Text.Smolder.HTML.Attributes (href, className, style)
+import Text.Smolder.HTML (a, div, h1, button)
+import Text.Smolder.HTML.Attributes (className, style)
 import Text.Smolder.Markup ((#!), (!), text)
+-- import Text.Smolder.Markup (MarkupM(..), Markup)
+-- import Control.Monad.Free (liftF)
+
+
+renderUserSelectionButton :: User -> HTML Event
+renderUserSelectionButton (User u) = 
+     button ! className "btn btn-primary" ! style "margin: 4px" #! onClick (const $ UserSelected (User u)) $ text u.name
 
 view :: State -> HTML Event
 view (State st) =
- div do
-    h1 $ text "Hola"
-    a ! style "display: none" ! className "guide" ! href "https://www.purescript-pux.org/" $ text $ show "Guide"
-    a ! style "display: none" ! className "guide" ! href "https://www.purescript-pux.org/" $ text $ show "Guide"
-    div do span $ text (show st.myCounter)
-    button #! onClick (const $ TheClickEvent 3) $ text "p 3"
-    button #! onClick (const $ TheClickEvent 5) $ text "p 5"
-
-viewX :: State -> HTML Event
-viewX (State st) =
   div do
-    span $ text (show st.myCounter)
+    h1 $ text "Quien es?"
+    div do 
+       renderUserSelectionButton $ User {name: "moni"}
+       renderUserSelectionButton $ User {name: "berni"}
 
-view2 :: State -> HTML Event
-view2 (State st) =
-  div do
-    h1 $ text "Pux"
-    a ! className "guide" ! href "https://www.purescript-pux.org/" $ text "Guide"
-    --button $ text "foo"
-    a ! className "github" ! href "https://github.com/alexmingoia/purescript-pux/" $ text "GitHub"
-    --div ! (style "margin-top: 30px") [
-    --div $  do span $ text "foo"
-    a $ text "Guide"
+    {-
+    --div do (renderUserSelectionButton $ User {name: "a"} ) `bind` (const (renderUserSelectionButton $ User {name: "b"}))
+    --div $ foldl (\a b -> bind a b) $ userSelectionButtons
+    div do
+       foldl foldFun foldInit userSelectionButtons
 
+  where 
+        users = User {name: "moni"} : User {name: "berni"} : Nil
+        userSelectionButtons :: List (HTML Event)
+        userSelectionButtons = map renderUserSelectionButton users
+        foldFun :: forall e. Markup e -> HTML Event -> Markup e
+        foldFun a b = a `bind` (\x -> b)
+        foldInit :: forall e. Markup e
+        foldInit = (liftF (Empty unit))
+        -}
