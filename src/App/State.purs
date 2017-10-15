@@ -60,9 +60,9 @@ newtype State = State
   }
 
 
-toEither :: forall a. Maybe a -> Either String a
-toEither (Just x) = Right x
-toEither (Nothing) = Left "err"
+toEither :: forall a. String -> Maybe a -> Either String a
+toEither _ (Just x) = Right x
+toEither s (Nothing) = Left s
 
 
 instance decodeJsonUser :: DecodeJson (User) where
@@ -109,7 +109,7 @@ h (x:xs) = Cons <$> x <*> (h xs)
 
 instance decodeJsonShoppingList :: DecodeJson (ShoppingList) where
   decodeJson json = do
-    foldJsonArray (Left "err") arrayToShoopingList json
+    foldJsonArray (Left $ "Not array " <> show json) arrayToShoopingList json
     where 
         --arrayToShoopingList o = ShoppingList <$> f o
         arrayToShoopingList :: Array Json -> Either String ShoppingList

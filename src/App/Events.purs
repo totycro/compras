@@ -44,4 +44,5 @@ foldp (RequestShoppingLists ) (State st) =
   }
 foldp (ReceiveShoppingLists (Left err)) (State st) =
   noEffects $ State st { lists = Failure $ Err err }
-foldp (ReceiveShoppingLists (Right result)) (State st) = noEffects $ State st
+foldp (ReceiveShoppingLists (Right result)) (State st) =
+  noEffects $ State st { lists = Success result }
