@@ -49,7 +49,10 @@ newtype Item = Item
   , buyAt :: List Shop
   }
 
-newtype ShoppingList = ShoppingList (List Item)
+newtype ShoppingList = ShoppingList
+  { name :: String
+  , items :: List Item
+  }
 
 newtype State = State
   { title :: String
@@ -96,45 +99,17 @@ instance decodeJsonItem :: DecodeJson (Item) where
       }
 
 
-{-
-f :: Array Json -> Either String (List Item)
-f x = h $ decodeJson <$> (fromFoldable x)
-
-
-h :: forall a. List (Either String a) -> Either String (List a)
-h Nil = pure Nil
-h (x:xs) = Cons <$> x <*> (h xs)
--}
-
-
 instance decodeJsonShoppingList :: DecodeJson (ShoppingList) where
   decodeJson json = do
-    foldJsonArray (Left $ "Not array " <> show json) arrayToShoopingList json
+    obj <- decodeJson json
+    itemsJson <- obj .? "items"
+    items <- foldJsonArray (Left $ "Not array " <> show json) arrayToItems itemsJson
+    name <- obj .? "name"
+    pure $ ShoppingList { items: items , name: name }
     where 
-        --arrayToShoopingList o = ShoppingList <$> f o
-        arrayToShoopingList :: Array Json -> Either String ShoppingList
-        arrayToShoopingList o = ShoppingList <$> fromFoldable <$> traverse decodeJson o
+        arrayToItems :: Array Json -> Either String (List Item)
+        arrayToItems o = fromFoldable <$> traverse decodeJson o
 
-
-{-
-instance decodeJsonShoppingList :: DecodeJson (ShoppingList) where
-  decodeJson json = do
-     fromFoldable $ foldJsonArray (Left "err")  \o ->
-       fromFoldable $ f o
-       -}
-{-
-instance decodeJsonShoppingList :: DecodeJson (ShoppingList) where
-  decodeJson json = do
-    -- obj <- decodeJson json
-    listJson <- (toEither $ toArray json) :: Either String JArray
-    listItems <- (decodeJson <$> listJson) --:: Either String (Array Item)
-    (either (Left <<< show) (\x -> ShoppingList x) listItems ) :: Either String ShoppingList
-    -- id <- obj .? "id"
-    -- title <- obj .? "title"
-    -- pure $ Todo { id: id, title: title }
--}
-
---derive instance newtypeState :: Newtype State _
 
 testItem :: Item
 testItem = Item 
@@ -152,7 +127,7 @@ someDateTime = DateTime someDay someTime
 
 
 testList :: ShoppingList
-testList = ShoppingList (testItem:Nil)
+testList = ShoppingList { name: "TestList", items: (testItem:Nil) }
 
 init :: String -> State
 init url = State

@@ -34,13 +34,13 @@ view (State st) =
 -- TODO: datetime serialization
 
 showItem :: Item -> HTML Event
-showItem (Item item) = div $ text item.name
+showItem (Item item) = li $ text item.name
 
 showList :: ShoppingList -> HTML Event
-showList (ShoppingList items) =
+showList (ShoppingList shoppingList) =
   div do
-     h3 $ text "list"
-     div $ for_ items showItem
+     h3 $ text $ "list: " <> shoppingList.name
+     ul $ for_ shoppingList.items showItem
 
 showLists :: RemoteData GenericLoadingError (List ShoppingList) -> HTML Event
 showLists (Success listList) =
