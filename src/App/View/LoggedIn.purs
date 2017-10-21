@@ -24,7 +24,7 @@ getUserName maybeUser = case maybeUser of
 view :: State -> HTML Event
 view (State st) =
   div do
-    h1 $ text ( "Hoy " <> (getUserName st.currentUser))
+    h1 $ text ( "Bienvenid@ " <> (getUserName st.currentUser))
     div do
       button ! className "btn btn-primary" #! onClick (const RequestShoppingLists) $ text "load"
     showLists st.lists
@@ -34,7 +34,7 @@ view (State st) =
 -- TODO: datetime serialization
 
 showItem :: Item -> HTML Event
-showItem (Item item) = div  $ text item.name
+showItem (Item item) = div $ text item.name
 
 showList :: ShoppingList -> HTML Event
 showList (ShoppingList items) =
