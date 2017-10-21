@@ -11,7 +11,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.end_headers()
 
-
     def do_GET(self):
         self.send_all_good()
         self.wfile.write(
@@ -21,22 +20,26 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                         'name': "Zeugs 1",
                         'items':[
                             {
+                                'id': 432,
                                 'name': 'Gurke',
                                 'addedBy': {
-                                    'name': 'Moni',
-                                    },
-                                'buyAt': [],
+                                'name': 'Moni',
                                 },
+                                'buyAt': [],
+                                'bought': False,
+                            },
                             {
+                                'id': 947,
                                 'name': 'Gurke2',
                                 'addedBy': {
-                                    'name': 'Moni',
-                                    },
+                                'name': 'Moni',
+                                },
                                 # 'buyAt': [ 'Hofer', 'Billa' ],
                                 'buyAt': [],
-                                }
-                            ]
-                        },
+                                'bought': True,
+                            },
+                        ]
+                    },
                     {
                         'name': "Zeugs 2",
                         'items': [],
@@ -44,6 +47,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 ],
             ).encode('utf-8') + b'\n'
         )
+
 
     def do_GET_elm(self):
         self.send_all_good()
@@ -72,6 +76,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 },
             ).encode('utf-8') + b'\n'
         )
+
+    def do_PATCH(self):
+        self.send_all_good()
+        length = int(self.headers['Content-Length'])
+        content_str = self.rfile.read(length)
+        content = json.loads(content_str)
+        self.wfile.write(
+            json.dumps(
+                {
+                    'bought': content['bought']
+                },
+            ).encode('utf-8') + b'\n'
+        )
+
+
 
 
 

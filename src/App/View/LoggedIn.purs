@@ -29,12 +29,15 @@ view (State st) =
       button ! className "btn btn-primary" #! onClick (const RequestShoppingLists) $ text "load"
     showLists st.lists
 
--- TODO: list should have a name
--- TODO: items should have bought flag
 -- TODO: datetime serialization
 
+createCheckbox :: Boolean -> HTML Event
+createCheckbox value = input ! type' "checkbox" ! checked (if value then "checked" else "" )
+
 showItem :: Item -> HTML Event
-showItem (Item item) = li $ text item.name
+showItem (Item item) = li do
+  text item.name
+  createCheckbox item.bought #! onClick (const $ RequestToggleBoughtState item.id (not item.bought))
 
 showList :: ShoppingList -> HTML Event
 showList (ShoppingList shoppingList) =
@@ -46,7 +49,6 @@ showLists :: RemoteData GenericLoadingError (List ShoppingList) -> HTML Event
 showLists (Success listList) =
   div do
     span $ text "loaded"
-
     div $ for_ listList showList
 
 

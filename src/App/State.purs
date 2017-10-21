@@ -41,12 +41,19 @@ newtype Shop = Shop
   { name :: String
   }
 
+newtype ItemId = ItemId Int
+
+instance itemEq :: Eq (ItemId) where
+  eq (ItemId a) (ItemId b) = eq a b
+
 newtype Item = Item
-  { name :: String
+  { id :: ItemId
+  , name :: String
   , addedAt :: DateTime
   , dueAt :: Maybe DateTime
   , addedBy :: User
   , buyAt :: List Shop
+  , bought :: Boolean
   }
 
 newtype ShoppingList = ShoppingList
@@ -85,17 +92,21 @@ instance decodeJsonShop :: DecodeJson (Shop) where
 instance decodeJsonItem :: DecodeJson (Item) where
   decodeJson json = do
      obj <- decodeJson json
+     id <- obj .? "id"
      name <- obj .? "name"
      addedBy <- obj .? "addedBy"
      --dueAt <- obj .? "dueAt"
      --addedAt <- obj .? "addedAt"
      buyAt <- obj .? "buyAt"
+     bought <- obj .? "bought"
      pure $ Item
-      { name: name
+      { id: ItemId id
+      , name: name
       , addedAt: someDateTime
       , addedBy: addedBy
       , dueAt: Nothing
       , buyAt: buyAt
+      , bought: bought
       }
 
 
@@ -113,11 +124,13 @@ instance decodeJsonShoppingList :: DecodeJson (ShoppingList) where
 
 testItem :: Item
 testItem = Item 
-  { name: "Zeug"
+  { id: ItemId 5
+  , name: "Zeug"
   , addedAt: DateTime someDay someTime
   , dueAt: Nothing
   , addedBy: User { name: "test" }
   , buyAt: Nil
+  , bought: false
   } 
 
 someDay = unsafePartial fromJust $ canonicalDate <$> toEnum 2017 <*> (Just September) <*> toEnum 4
