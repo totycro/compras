@@ -13,7 +13,7 @@ import CSS.Text.Transform (textTransform, uppercase)
 import Color (rgb)
 import Control.Bind (discard)
 import Data.Function (($), (#))
-import Pux.DOM.HTML (HTML, style)
+import Pux.DOM.HTML (HTML)
 import Text.Smolder.HTML (div)
 import Text.Smolder.HTML.Attributes (className)
 import Text.Smolder.Markup ((!))
@@ -21,7 +21,7 @@ import Text.Smolder.Markup ((!))
 view :: State -> HTML Event
 view (State st) =
   div ! className "app" $ do
-    style css
+    -- style css
 
     case st.route of
       (Home) -> Homepage.view (State st)
@@ -29,6 +29,7 @@ view (State st) =
 
 css :: CSS
 css = do
+
   let green = rgb 14 196 172
       blue = rgb 14 154 196
       white = rgb 250 250 250
@@ -68,3 +69,4 @@ css = do
   fromString ".github:hover" ? do
     backgroundColor blue
     color white
+
