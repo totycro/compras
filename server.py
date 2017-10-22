@@ -17,6 +17,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             json.dumps(
                 [
                     {
+                        'id': 3,
                         'name': "Zeugs 1",
                         'items':[
                             {
@@ -41,6 +42,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                         ]
                     },
                     {
+                        'id': 6,
                         'name': "Zeugs 2",
                         'items': [],
                     }

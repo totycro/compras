@@ -4,8 +4,9 @@ import Prelude hiding (div)
 
 import Data.Argonaut (class DecodeJson, decodeJson, (.?), (:=), (~>), jsonEmptyObject)
 import Control.Monad.Aff (attempt)
-import App.Routes (Route(..))
+import App.Routes (Route(..), toURL)
 import App.State
+import App.Types
 import Data.Function (($))
 import Data.Maybe (Maybe(..))
 import Data.List (List(..), (:))
@@ -13,6 +14,15 @@ import Data.Either (Either(..), either)
 import Network.HTTP.Affjax (AJAX, get, patch)
 import Pux (EffModel, noEffects)
 import Control.Applicative (pure)
+import Control.Monad.Eff.Class (liftEff)
+import DOM.HTML (window)
+import DOM (DOM)
+import DOM.HTML.History (DocumentTitle(..), URL(..), pushState)
+import DOM.HTML.Types (HISTORY)
+import DOM.HTML.Window (history)
+import Data.Foreign (toForeign)
+import DOM.Event.Event (preventDefault)
+import Pux.DOM.Events (DOMEvent)
 
 
 data Event 
@@ -22,8 +32,9 @@ data Event
   | ReceiveShoppingLists (Either String (List ShoppingList))
   | RequestToggleBoughtState ItemId Boolean
   | ReceiveToggleBoughtState (Either String { id :: ItemId, bought :: Boolean })
+  | ShoppingListSelected ShoppingList DOMEvent
 
-type AppEffects fx = (ajax :: AJAX | fx)
+type AppEffects fx = (ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
 
 -- TODO: get rid of this?
 newtype ToggleBoughtStateResponse = ToggleBoughtStateResponse { bought :: Boolean }
@@ -35,16 +46,30 @@ instance toggleBoughtStateResponseDecodeJson :: DecodeJson (ToggleBoughtStateRes
      pure $ ToggleBoughtStateResponse { bought: bought }
 
 
+navigateTo r = do
+   liftEff do
+      h <- history =<< window
+      pushState (toForeign {}) (DocumentTitle "") (URL $ toURL r) h
+   pure (Just (PageView r))
+
+
 foldp :: ∀ fx. Event -> State -> EffModel State Event (AppEffects fx)
 foldp (PageView route) (State st) =
 	noEffects $ State st { route = route }
+
 foldp (UserSelected u) (State st) =
   { state: State st { currentUser = Just u }
-  , effects: [
-      do
-         pure (Just (PageView LoggedIn))
-     ]
+  , effects: [ navigateTo LoggedIn ]   }
+
+foldp (ShoppingListSelected sl ev) (State st) =
+  { state:  State st { selectedList = Just sl }
+  , effects: [ do
+      liftEff do
+        preventDefault ev
+      pure Nothing
+  ]
   }
+
 foldp (RequestShoppingLists ) (State st) =
   { state: State st { lists = Loading }
   , effects: [
@@ -74,7 +99,7 @@ foldp (RequestToggleBoughtState (ItemId id) newBoughtState) (State st) =
    }
 
 foldp (ReceiveToggleBoughtState (Left err)) (State st) =
-  noEffects $ State st  -- TODO: error handling?
+  noEffects $ State st  -- TODO: error handling
 foldp (ReceiveToggleBoughtState (Right result)) (State st @ { lists: Success loadedLists }) =
   noEffects $ State st { lists = Success newList }
   where

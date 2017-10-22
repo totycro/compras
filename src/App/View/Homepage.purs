@@ -3,7 +3,8 @@ module App.View.Homepage where
 import Prelude (const)
 
 import App.Events (Event(..))
-import App.State (State(..), User(..))
+import App.State (State(..))
+import App.Types (User(..))
 import Control.Bind (discard)
 import Data.Function (($))
 import Data.Foldable
