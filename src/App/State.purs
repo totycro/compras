@@ -41,6 +41,7 @@ newtype Shop = Shop
   { name :: String
   }
 
+-- TODO: Refactor to make this a type alias, that's enough
 newtype ItemId = ItemId Int
 
 instance itemEq :: Eq (ItemId) where
@@ -64,15 +65,9 @@ newtype ShoppingList = ShoppingList
 newtype State = State
   { title :: String
   , route :: Route
-  , loaded :: Boolean
   , currentUser :: Maybe User
   , lists :: RemoteData GenericLoadingError (List ShoppingList)
   }
-
-
-toEither :: forall a. String -> Maybe a -> Either String a
-toEither _ (Just x) = Right x
-toEither s (Nothing) = Left s
 
 
 instance decodeJsonUser :: DecodeJson (User) where
@@ -146,9 +141,9 @@ init :: String -> State
 init url = State
   { title: config.title
   , route: match url
-  , loaded: false
   , currentUser: Nothing
   --, lists: Success (testList : Nil)
   , lists: NotAsked
+  , selectedList: Maybe ShoppingList
   }
 

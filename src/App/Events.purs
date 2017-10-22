@@ -37,7 +37,7 @@ instance toggleBoughtStateResponseDecodeJson :: DecodeJson (ToggleBoughtStateRes
 
 foldp :: ∀ fx. Event -> State -> EffModel State Event (AppEffects fx)
 foldp (PageView route) (State st) =
-	noEffects $ State st { route = route, loaded = true }
+	noEffects $ State st { route = route }
 foldp (UserSelected u) (State st) =
   { state: State st { currentUser = Just u }
   , effects: [
