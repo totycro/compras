@@ -15,6 +15,9 @@ data Route
   | ListDetail ShoppingList
   | NotFound String
 
+
+-- TODO: nicer routes, cf. e.g. https://github.com/dariooddenino/pux-blog/blob/master/src/Layout.purs
+
 match :: String -> Route
 match url = fromMaybe (NotFound url) $ router url $
   Home <$ end

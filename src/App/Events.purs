@@ -32,7 +32,7 @@ data Event
   | ReceiveShoppingLists (Either String (List ShoppingList))
   | RequestToggleBoughtState ItemId Boolean
   | ReceiveToggleBoughtState (Either String { id :: ItemId, bought :: Boolean })
-  | ShoppingListSelected ShoppingList DOMEvent
+  | ShoppingListSelected (Maybe ShoppingList) DOMEvent
 
 type AppEffects fx = (ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
 
@@ -62,7 +62,7 @@ foldp (UserSelected u) (State st) =
   , effects: [ navigateTo LoggedIn ]   }
 
 foldp (ShoppingListSelected sl ev) (State st) =
-  { state:  State st { selectedList = Just sl }
+  { state:  State st { selectedList = sl }
   , effects: [ do
       liftEff do
         preventDefault ev

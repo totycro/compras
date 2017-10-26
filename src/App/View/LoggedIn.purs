@@ -31,7 +31,9 @@ view (State st) =
     centralView st.lists st.selectedList
 
 centralView :: RemoteData GenericLoadingError (List ShoppingList) -> Maybe ShoppingList -> HTML Event
-centralView shoppingLists (Just sl) = showSelectedList sl
+centralView shoppingLists (Just sl) = div do
+   button ! className "btn btn-secondary" #! onClick (ShoppingListSelected Nothing) $ text "back"
+   showSelectedList sl
 centralView shoppingLists Nothing = showLists shoppingLists
 
 -- TODO: datetime serialization
@@ -61,7 +63,7 @@ showListInOverview (ShoppingList shoppingList) =
     a
       -- ! style "cursor: pointer"
       ! href "#"
-      #! onClick (ShoppingListSelected $ ShoppingList shoppingList)
+      #! onClick (ShoppingListSelected $ Just $ ShoppingList shoppingList)
       $ text $ "list: " <> shoppingList.name
 
 
@@ -74,5 +76,6 @@ showList (ShoppingList shoppingList) =
      h3 $ text $ "list: " <> shoppingList.name
      ul $ for_ shoppingList.items showItem
      div do
+        -- TODO actually implement adding
         input -- ! value st.newItem #! onChange (const ChangeNewItem)
         button $ text "add" -- #! onClick (const AddNewItem
