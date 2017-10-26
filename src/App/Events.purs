@@ -88,6 +88,7 @@ foldp (AddNewList) (State st) =
 -- TOOD: refactor such that new lists by design only can be created in parts of the program where we actually have loaded lists alread
 foldp (ReceiveNewShoppingList (Left err)) (State st) =
   noEffects $ State st  -- TODO: error handling
+  -- TODO: add check in backend if list with name already exists and handle error here
 foldp (ReceiveNewShoppingList (Right newList)) (State st) =
   noEffects $ State st { lists = (newList : _) <$> st.lists}
 

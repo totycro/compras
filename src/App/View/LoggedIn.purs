@@ -33,7 +33,10 @@ view (State st) =
 
 centralView :: RemoteData GenericLoadingError (List ShoppingList) -> Maybe ShoppingList -> HTML Event
 centralView shoppingLists (Just sl) = div do
-   button ! className "btn btn-secondary" #! onClick (ShoppingListSelected Nothing) $ text "back"
+   button
+     ! className "btn btn-secondary mb-3"
+     #! onClick (ShoppingListSelected Nothing)
+     $ text "back"
    showSelectedList sl
 centralView shoppingLists Nothing = showLists shoppingLists
 
@@ -44,7 +47,7 @@ centralView shoppingLists Nothing = showLists shoppingLists
 showAddNewList :: String -> HTML Event
 showAddNewList newListName =
   div do
-    h3 ! style "margin-top: 32px" $ text "Add new list"
+    h5 ! style "margin-top: 32px" $ text "Add new list"
     input ! value newListName #! onInput (\ev -> ChangeNewListName $ targetValue ev)
     (disableIfStringEmpty (button #! onClick (const AddNewList)) newListName) $ text "add"
   where
@@ -84,10 +87,11 @@ showSelectedList sl = showList sl
 
 showList :: ShoppingList -> HTML Event
 showList (ShoppingList shoppingList) =
-  div do
-     h3 $ text $ "list: " <> shoppingList.name
-     ul $ for_ shoppingList.items showItem
-     div do
-        -- TODO actually implement adding after finishing adding lists
-        input -- ! value st.newItem #! onChange (const ChangeNewItem)
-        button $ text "add" -- #! onClick (const AddNewItem
+  div ! className "card mb-3" $ do
+     div ! className "card-body" $ do
+       h3 ! className "card-title" $ text shoppingList.name
+       ul $ for_ shoppingList.items showItem
+       h5 $ text "Add new item to list"
+       -- TODO actually implement adding after finishing adding lists
+       input -- ! value st.newItem #! onChange (const ChangeNewItem)
+       button $ text "add" -- #! onClick (const AddNewItem
