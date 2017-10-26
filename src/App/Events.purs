@@ -101,9 +101,9 @@ foldp (RequestToggleBoughtState (ItemId id) newBoughtState) (State st) =
 foldp (ReceiveToggleBoughtState (Left err)) (State st) =
   noEffects $ State st  -- TODO: error handling
 foldp (ReceiveToggleBoughtState (Right result)) (State st @ { lists: Success loadedLists }) =
-  noEffects $ State st { lists = Success newList }
+  noEffects $ State st { lists = Success newLists }
   where
-        newList = updateBoughtState loadedLists result.id result.bought
+        newLists = updateBoughtState loadedLists result.id result.bought
 foldp (ReceiveToggleBoughtState (Right result)) (State st) =
   noEffects $ State st
 
