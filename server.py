@@ -4,6 +4,14 @@ import json
 import socketserver
 import http.server
 
+def unique_id_sequence():
+    i = 0
+    while True:
+        yield i
+        i +=  1
+
+unique_id_sequence= unique_id_sequence()  # don't try this at home
+
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def send_all_good(self):
@@ -17,11 +25,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             json.dumps(
                 [
                     {
-                        'id': 3,
+                        'id': next(unique_id_sequence),
                         'name': "Zeugs 1",
                         'items':[
                             {
-                                'id': 432,
+                                'id': next(unique_id_sequence),
                                 'name': 'Gurke',
                                 'addedBy': {
                                 'name': 'Moni',
@@ -30,7 +38,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                                 'bought': False,
                             },
                             {
-                                'id': 947,
+                                'id': next(unique_id_sequence),
                                 'name': 'Gurke2',
                                 'addedBy': {
                                 'name': 'Moni',
@@ -42,7 +50,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                         ]
                     },
                     {
-                        'id': 6,
+                        'id': next(unique_id_sequence),
                         'name': "Zeugs 2",
                         'items': [],
                     }
@@ -51,39 +59,23 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         )
 
 
-    def do_GET_elm(self):
+    def do_POST(self):
         self.send_all_good()
-        self.wfile.write(
-            json.dumps(
-                [
-                    {
-                        'name': 'A. Bar',
-                        'role': 'Doer',
-                    },
-                    {
-                        'name': 'B. Foo',
-                        'role': 'Dentist',
-                    },
-                ]
-            ).encode('utf-8') + b'\n'
-        )
-
-    def do_PUT(self):
-        self.send_all_good()
+        # assume query to add list
+        content = self.read_json_content()
         self.wfile.write(
             json.dumps(
                 {
-                    'name': 'A. Bar',
-                    'role': 'Doer',
-                },
+                    'id': next(unique_id_sequence),
+                    'name': content['name'],
+                    'items': [],
+                }
             ).encode('utf-8') + b'\n'
         )
 
     def do_PATCH(self):
         self.send_all_good()
-        length = int(self.headers['Content-Length'])
-        content_str = self.rfile.read(length)
-        content = json.loads(content_str)
+        content = self.read_json_content()
         self.wfile.write(
             json.dumps(
                 {
@@ -91,6 +83,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 },
             ).encode('utf-8') + b'\n'
         )
+
+    def read_json_content(self):
+        length = int(self.headers['Content-Length'])
+        content_str = self.rfile.read(length)
+        return json.loads(content_str)
 
 
 

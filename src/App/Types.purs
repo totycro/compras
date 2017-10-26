@@ -15,6 +15,7 @@ import Data.DateTime (DateTime(..))
 import Data.Date (canonicalDate,  Month(..))
 import Data.Time (Time(..))
 import Data.Either (Either(..), either)
+import Data.Functor
 
 import Partial.Unsafe (unsafePartial)
 import Data.Enum (toEnum)
@@ -25,6 +26,13 @@ data RemoteData e a
   | Loading
   | Failure e
   | Success a
+
+
+instance remoteDataFunctor :: Functor (RemoteData e) where
+  map f (Success e) = Success $ f e
+  map f NotAsked = NotAsked
+  map f (Failure e) = Failure e
+  map f Loading = Loading
 
 data GenericLoadingError
   = Err String

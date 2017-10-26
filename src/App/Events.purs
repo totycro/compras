@@ -11,7 +11,7 @@ import Data.Function (($))
 import Data.Maybe (Maybe(..))
 import Data.List (List(..), (:))
 import Data.Either (Either(..), either)
-import Network.HTTP.Affjax (AJAX, get, patch)
+import Network.HTTP.Affjax (AJAX, get, patch, post)
 import Pux (EffModel, noEffects)
 import Control.Applicative (pure)
 import Control.Monad.Eff.Class (liftEff)
@@ -33,6 +33,9 @@ data Event
   | RequestToggleBoughtState ItemId Boolean
   | ReceiveToggleBoughtState (Either String { id :: ItemId, bought :: Boolean })
   | ShoppingListSelected (Maybe ShoppingList) DOMEvent
+  | ChangeNewListName String
+  | AddNewList
+  | ReceiveNewShoppingList (Either String ShoppingList)
 
 type AppEffects fx = (ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
 
@@ -64,11 +67,29 @@ foldp (UserSelected u) (State st) =
 foldp (ShoppingListSelected sl ev) (State st) =
   { state:  State st { selectedList = sl }
   , effects: [ do
-      liftEff do
-        preventDefault ev
+      liftEff (preventDefault ev)
       pure Nothing
   ]
   }
+
+foldp (ChangeNewListName newListName) (State st) =
+  noEffects $ State st { newListName = newListName }
+
+foldp (AddNewList) (State st) =
+  { state: State st { newListName = "" }
+  , effects: [ do
+    let requestJson = ("name" := st.newListName) ~> jsonEmptyObject
+    res <- attempt $ post "/api/list" requestJson
+    let decode r = decodeJson r.response :: Either String (ShoppingList)
+    let listResult = either (Left <<< show) decode res :: Either String (ShoppingList)
+    pure $ Just $ ReceiveNewShoppingList listResult
+  ]
+  }
+-- TOOD: refactor such that new lists by design only can be created in parts of the program where we actually have loaded lists alread
+foldp (ReceiveNewShoppingList (Left err)) (State st) =
+  noEffects $ State st  -- TODO: error handling
+foldp (ReceiveNewShoppingList (Right newList)) (State st) =
+  noEffects $ State st { lists = (newList : _) <$> st.lists}
 
 foldp (RequestShoppingLists ) (State st) =
   { state: State st { lists = Loading }

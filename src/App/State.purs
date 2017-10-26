@@ -25,6 +25,7 @@ newtype State = State
   , currentUser :: Maybe User
   , lists :: RemoteData GenericLoadingError (List ShoppingList)
   , selectedList :: Maybe ShoppingList
+  , newListName :: String
   }
 
 
@@ -36,5 +37,6 @@ init url = State
   --, lists: Success (testList : Nil)
   , lists: NotAsked
   , selectedList: Nothing
+  , newListName: ""
   }
 

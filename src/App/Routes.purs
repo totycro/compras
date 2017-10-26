@@ -24,6 +24,8 @@ match url = fromMaybe (NotFound url) $ router url $
   <|>
   LoggedIn <$ (lit "app") <* end
 
+-- TODO: also fix current urls, /app/list/123 doesn't work yet
+
 toURL :: Route -> String
 toURL (NotFound url) = url
 toURL (LoggedIn ) = "/#/app"
