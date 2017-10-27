@@ -64,6 +64,9 @@ newtype Item = Item
   , bought :: Boolean
   }
 
+instance itemShow :: Show (Item) where
+  show (Item item) = "Item" <> " " <> item.name <> " (bought: " <> show item.bought <>")"
+
 
 type ShoppingListId = Int
   
@@ -72,6 +75,9 @@ newtype ShoppingList = ShoppingList
   , name :: String
   , items :: List Item
   }
+
+instance shoppingListShow :: Show (ShoppingList) where
+  show (ShoppingList sl) = "List " <> show sl.id <> ": " <> sl.name <> ": " <> show sl.items
 
 
 instance decodeJsonUser :: DecodeJson (User) where

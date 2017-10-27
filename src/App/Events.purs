@@ -9,7 +9,7 @@ import App.State
 import App.Types
 import Data.Function (($))
 import Data.Maybe (Maybe(..))
-import Data.List (List(..), (:))
+import Data.List (List(..), (:), head)
 import Data.Either (Either(..), either)
 import Network.HTTP.Affjax (AJAX, get, patch, post)
 import Pux (EffModel, noEffects)
@@ -123,9 +123,15 @@ foldp (RequestToggleBoughtState (ItemId id) newBoughtState) (State st) =
 foldp (ReceiveToggleBoughtState (Left err)) (State st) =
   noEffects $ State st  -- TODO: error handling
 foldp (ReceiveToggleBoughtState (Right result)) (State st @ { lists: Success loadedLists }) =
-  noEffects $ State st { lists = Success newLists }
+  noEffects $ State st {
+    lists = Success newLists,
+    selectedList = updateSelectedList st.selectedList
+  }
   where
         newLists = updateBoughtState loadedLists result.id result.bought
+        updateSelectedList :: Maybe ShoppingList -> Maybe ShoppingList
+        updateSelectedList (Just sl) = head $ updateBoughtState (sl:Nil) result.id result.bought
+        updateSelectedList Nothing = Nothing
 foldp (ReceiveToggleBoughtState (Right result)) (State st) =
   noEffects $ State st
 
@@ -137,6 +143,6 @@ updateBoughtState shoppingLists itemId newBoughtState =
         updateShoppingList :: ShoppingList -> ShoppingList
         updateShoppingList (ShoppingList sl) = ShoppingList sl { items = updateItem <$> sl.items }
 
-        updateItem :: Item ->  Item
+        updateItem :: Item -> Item
         updateItem (Item item@{ id: id }) | id == itemId = Item (item { bought = newBoughtState } )
         updateItem item = item
