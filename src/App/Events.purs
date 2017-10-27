@@ -8,7 +8,7 @@ import App.Routes (Route(..), toURL)
 import App.State
 import App.Types
 import Data.Function (($))
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.List (List(..), (:), head)
 import Data.Either (Either(..), either)
 import Network.HTTP.Affjax (AJAX, get, patch, post)
@@ -23,6 +23,7 @@ import DOM.HTML.Window (history)
 import Data.Foreign (toForeign)
 import DOM.Event.Event (preventDefault)
 import Pux.DOM.Events (DOMEvent)
+import Data.Tuple
 
 
 data Event 
@@ -36,6 +37,11 @@ data Event
   | ChangeNewListName String
   | AddNewList
   | ReceiveNewShoppingList (Either String ShoppingList)
+  | ChangeNewItemName String
+  | AddNewItem ShoppingListId
+  | ReceiveNewItem (Either String (Tuple ShoppingListId Item))
+
+
 
 type AppEffects fx = (ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
 
@@ -91,6 +97,30 @@ foldp (ReceiveNewShoppingList (Left err)) (State st) =
   -- TODO: add check in backend if list with name already exists and handle error here
 foldp (ReceiveNewShoppingList (Right newList)) (State st) =
   noEffects $ State st { lists = (newList : _) <$> st.lists}
+
+foldp (ChangeNewItemName newItemName) (State st) =
+  noEffects $ State st { newItemName = newItemName }
+
+foldp (AddNewItem slId) (State st) =
+  { state: State st { newItemName = "" }
+  , effects: [ do
+    let requestJson = ("name" := st.newItemName) ~> jsonEmptyObject
+    res <- attempt $ post ("/api/list/" <> show slId <> "/") requestJson
+    let decode r = decodeJson r.response :: Either String (Item)
+    let newItem = either (Left <<< show) decode res :: Either String (Item)
+    pure $ Just $ ReceiveNewItem $ map (\item -> Tuple slId item) newItem
+  ]
+  }
+foldp (ReceiveNewItem (Left err)) (State st) =
+  noEffects $ State st  -- TODO: error handling
+  -- TODO: add check in backend if item with name already exists and handle error here
+foldp (ReceiveNewItem (Right tup)) (State st @ { lists: Success lists}) =
+  noEffects $ State st { lists = Success $ updateLists <$> lists}
+  where
+        updateLists (ShoppingList sl) | sl.id == (fst tup) = ShoppingList $ sl { items = (snd tup) : sl.items }
+        updateLists s = s
+foldp (ReceiveNewItem (Right tup)) (State st) = noEffects $ State st -- TODO: get rid of this state
+
 
 foldp (RequestShoppingLists ) (State st) =
   { state: State st { lists = Loading }

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import re
 import socketserver
 import http.server
 
@@ -63,15 +64,37 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_all_good()
         # assume query to add list
         content = self.read_json_content()
-        self.wfile.write(
-            json.dumps(
-                {
-                    'id': next(unique_id_sequence),
-                    'name': content['name'],
-                    'items': [],
-                }
-            ).encode('utf-8') + b'\n'
-        )
+        print ("Post to path", self.path)
+
+        add_item_match = re.match(r".*/list/(?P<list_id>\d+)/$", self.path)
+        if add_item_match:
+            print("Adding new item")
+            list_id = add_item_match.group("list_id")
+            self.wfile.write(
+                json.dumps(
+                    {
+                        'id': next(unique_id_sequence),
+                        'name': content['name'],
+                        'items': [],
+                        'addedBy': {
+                            'name': 'Moni',
+                        },
+                        'buyAt': [],
+                        'bought': False,
+                    }
+                ).encode('utf-8') + b'\n'
+            )
+        else:
+            print("Adding new list")
+            self.wfile.write(
+                json.dumps(
+                    {
+                        'id': next(unique_id_sequence),
+                        'name': content['name'],
+
+                    }
+                ).encode('utf-8') + b'\n'
+            )
 
     def do_PATCH(self):
         self.send_all_good()
