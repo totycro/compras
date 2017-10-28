@@ -9,7 +9,7 @@ import App.State
 import App.Types
 import Data.Function (($))
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.List (List(..), (:), head)
+import Data.List (List(..), (:), head, snoc)
 import Data.Either (Either(..), either)
 import Network.HTTP.Affjax (AJAX, get, patch, post)
 import Pux (EffModel, noEffects)
@@ -96,7 +96,7 @@ foldp (ReceiveNewShoppingList (Left err)) (State st) =
   noEffects $ State st  -- TODO: error handling
   -- TODO: add check in backend if list with name already exists and handle error here
 foldp (ReceiveNewShoppingList (Right newList)) (State st) =
-  noEffects $ State st { lists = (newList : _) <$> st.lists}
+  noEffects $ State st { lists = (\lists -> snoc lists newList) <$> st.lists}
 
 foldp (ChangeNewItemName newItemName) (State st) =
   noEffects $ State st { newItemName = newItemName }
@@ -117,7 +117,7 @@ foldp (ReceiveNewItem (Left err)) (State st) =
 foldp (ReceiveNewItem (Right tup)) (State st @ { lists: Success lists}) =
   noEffects $ State st { lists = Success $ updateLists <$> lists}
   where
-        updateLists (ShoppingList sl) | sl.id == (fst tup) = ShoppingList $ sl { items = (snd tup) : sl.items }
+        updateLists (ShoppingList sl) | sl.id == (fst tup) = ShoppingList $ sl { items = snoc sl.items (snd tup)}
         updateLists s = s
 foldp (ReceiveNewItem (Right tup)) (State st) = noEffects $ State st -- TODO: get rid of this state
 
