@@ -55,11 +55,7 @@ newtype Shop = Shop
   { name :: String
   }
 
--- TODO: Refactor to make this a type alias, that's enough
-newtype ItemId = ItemId Int
-
-instance itemEq :: Eq (ItemId) where
-  eq (ItemId a) (ItemId b) = eq a b
+type ItemId = Int
 
 newtype Item = Item
   { id :: ItemId
@@ -112,7 +108,7 @@ instance decodeJsonItem :: DecodeJson (Item) where
      buyAt <- obj .? "buyAt"
      bought <- obj .? "bought"
      pure $ Item
-      { id: ItemId id
+      { id: id
       , name: name
       , addedAt: someDateTime
       , addedBy: addedBy
@@ -137,7 +133,7 @@ instance decodeJsonShoppingList :: DecodeJson (ShoppingList) where
 
 testItem :: Item
 testItem = Item 
-  { id: ItemId 5
+  { id: 5
   , name: "Zeug"
   , addedAt: DateTime someDay someTime
   , dueAt: Nothing

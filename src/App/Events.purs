@@ -137,15 +137,15 @@ foldp (ReceiveShoppingLists (Left err)) (State st) =
 foldp (ReceiveShoppingLists (Right result)) (State st) =
   noEffects $ State st { lists = Success result }
 
-foldp (RequestToggleBoughtState (ItemId id) newBoughtState) (State st) =
+foldp (RequestToggleBoughtState itemId newBoughtState) (State st) =
   { state : State st
   , effects: [
   do
      let requestJson = ("bought" := newBoughtState) ~> jsonEmptyObject
-     res <- attempt $ patch ("/api/item/" <> (show id) <> "/") requestJson
+     res <- attempt $ patch ("/api/item/" <> (show itemId) <> "/") requestJson
      let decode r = decodeJson r.response :: Either String ToggleBoughtStateResponse
      let result = either (Left <<< show) decode res :: Either String ToggleBoughtStateResponse
-     let resultParsed = map (\(ToggleBoughtStateResponse response) -> { id: ItemId id, bought: response.bought } ) result
+     let resultParsed = map (\(ToggleBoughtStateResponse response) -> { id: itemId, bought: response.bought } ) result
      pure $ Just $ ReceiveToggleBoughtState resultParsed
    ]
    }
