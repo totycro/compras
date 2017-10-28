@@ -47,11 +47,17 @@ centralView shoppingLists Nothing _ = showLists shoppingLists
 -- Alternatively, the overview in the main page could just be an overview, whereas on detail selection the actual items are loaded. this has the disadvantage of increased loading time
 
 showAddNewList :: String -> HTML Event
-showAddNewList newListName =
-  form do
-    h5 ! Attributes.style "margin-top: 32px" $ text "Add new list"
-    input ! Attributes.value newListName #! onInput (\ev -> ChangeNewListName $ targetValue ev)
-    (disableIfStringEmpty newListName button) #! onClick (const AddNewList) $ text "add"
+showAddNewList newListName = div $ do
+  h5 ! Attributes.className "mt-4" $ text "Add new list"
+  form ! Attributes.className "form-inline" $ do
+    div ! Attributes.className "form-group" $ do
+      input
+        ! Attributes.className "form-control"
+        ! Attributes.value newListName
+        #! onInput (\ev -> ChangeNewListName $ targetValue ev)
+      (disableIfStringEmpty newListName button)
+        ! Attributes.className "btn btn-primary ml-2"
+        #! onClick (const AddNewList) $ text "add"
 
 disableIfStringEmpty :: forall ta. Attributable ta => String -> ta -> ta
 disableIfStringEmpty "" x = x ! Attributes.disabled "disabled"
@@ -84,10 +90,17 @@ showListInOverview (ShoppingList shoppingList) =
 
 showSelectedList :: ShoppingList -> String -> HTML Event
 showSelectedList (ShoppingList sl) newItemName = div do
-  showList (ShoppingList sl) (form do
+  showList (ShoppingList sl) ( div do
     h5 $ text "Add new item to list"
-    input ! Attributes.value newItemName #! onChange (\ev -> ChangeNewItemName $ targetValue ev)
-    (disableIfStringEmpty newItemName button ) #! onClick (const $ AddNewItem sl.id) $ text "add"
+    form ! Attributes.className "form-inline" $ do
+      div ! Attributes.className "form-group" $ do
+        input
+          ! Attributes.className "form-control"
+          ! Attributes.value newItemName
+          #! onChange (\ev -> ChangeNewItemName $ targetValue ev)
+        (disableIfStringEmpty newItemName button )
+          ! Attributes.className "btn btn-primary ml-2"
+          #! onClick (const $ AddNewItem sl.id) $ text "add"
   )
 
 
