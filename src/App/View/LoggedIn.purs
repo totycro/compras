@@ -48,7 +48,7 @@ centralView shoppingLists Nothing _ = showLists shoppingLists
 
 showAddNewList :: String -> HTML Event
 showAddNewList newListName =
-  div do
+  form do
     h5 ! Attributes.style "margin-top: 32px" $ text "Add new list"
     input ! Attributes.value newListName #! onInput (\ev -> ChangeNewListName $ targetValue ev)
     (disableIfStringEmpty newListName button) #! onClick (const AddNewList) $ text "add"
@@ -84,7 +84,7 @@ showListInOverview (ShoppingList shoppingList) =
 
 showSelectedList :: ShoppingList -> String -> HTML Event
 showSelectedList (ShoppingList sl) newItemName = div do
-  showList (ShoppingList sl) (div $ do
+  showList (ShoppingList sl) (form do
     h5 $ text "Add new item to list"
     input ! Attributes.value newItemName #! onChange (\ev -> ChangeNewItemName $ targetValue ev)
     (disableIfStringEmpty newItemName button ) #! onClick (const $ AddNewItem sl.id) $ text "add"
