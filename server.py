@@ -75,7 +75,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     {
                         'id': next(unique_id_sequence),
                         'name': content['name'],
-                        'items': [],
                         'addedBy': {
                             'name': 'Moni',
                         },
@@ -91,7 +90,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     {
                         'id': next(unique_id_sequence),
                         'name': content['name'],
-
+                        'items': [],
                     }
                 ).encode('utf-8') + b'\n'
             )
