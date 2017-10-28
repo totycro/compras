@@ -70,8 +70,8 @@ foldp (UserSelected u) (State st) =
   { state: State st { currentUser = Just u }
   , effects: [ navigateTo LoggedIn ]   }
 
-foldp (ShoppingListSelected sl ev) (State st) =
-  { state:  State st { selectedList = sl }
+foldp (ShoppingListSelected maybeSl ev) (State st) =
+  { state:  State st { selectedListId = (\(ShoppingList sl) -> sl.id) <$>  maybeSl }
   , effects: [ do
       liftEff (preventDefault ev)
       pure Nothing
@@ -154,14 +154,10 @@ foldp (ReceiveToggleBoughtState (Left err)) (State st) =
   noEffects $ State st  -- TODO: error handling
 foldp (ReceiveToggleBoughtState (Right result)) (State st @ { lists: Success loadedLists }) =
   noEffects $ State st {
-    lists = Success newLists,
-    selectedList = updateSelectedList st.selectedList
+    lists = Success newLists
   }
   where
         newLists = updateBoughtState loadedLists result.id result.bought
-        updateSelectedList :: Maybe ShoppingList -> Maybe ShoppingList
-        updateSelectedList (Just sl) = head $ updateBoughtState (sl:Nil) result.id result.bought
-        updateSelectedList Nothing = Nothing
 foldp (ReceiveToggleBoughtState (Right result)) (State st) =
   noEffects $ State st
 

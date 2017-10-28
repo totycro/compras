@@ -28,7 +28,7 @@ view (State st) =
     h1 $ text ( "Bienvenid@ " <> (getUserName st.currentUser))
     div do
       button ! className "btn btn-primary" #! onClick (const RequestShoppingLists) $ text "load"
-    centralView st.lists st.selectedList st.newItemName
+    centralView st.lists (getSelectedList (State st)) st.newItemName
     showAddNewList st.newListName
 
 centralView :: RemoteData GenericLoadingError (List ShoppingList) -> Maybe ShoppingList -> String -> HTML Event

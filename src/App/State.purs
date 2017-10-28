@@ -7,9 +7,9 @@ import Data.Traversable
 
 import App.Config (config)
 import App.Routes (Route, match)
-import App.Types (ShoppingList(..), User, RemoteData(..), GenericLoadingError(..))
+import App.Types (ShoppingList(..), User, RemoteData(..), GenericLoadingError(..), ShoppingListId, remoteDataToMaybe)
 
-import Data.List (List(..), (:), fromFoldable)
+import Data.List (List(..), (:), fromFoldable, head, filter)
 import Data.Maybe (Maybe(..), fromJust)
 import Data.DateTime (DateTime(..))
 import Data.Date (canonicalDate,  Month(..))
@@ -24,10 +24,21 @@ newtype State = State
   , route :: Route
   , currentUser :: Maybe User
   , lists :: RemoteData GenericLoadingError (List ShoppingList)
-  , selectedList :: Maybe ShoppingList
+  , selectedListId :: Maybe ShoppingListId
   , newListName :: String
   , newItemName :: String
   }
+
+
+getSelectedList :: State -> Maybe ShoppingList
+getSelectedList (State st) = do
+  slId <- st.selectedListId
+  lists <- (remoteDataToMaybe st.lists)
+  selectedList <- filterLists lists slId
+  pure selectedList
+  where
+    filterLists :: List ShoppingList -> ShoppingListId -> Maybe ShoppingList
+    filterLists lists listId = head $ filter (\(ShoppingList sl) -> sl.id == listId) lists
 
 
 init :: String -> State
@@ -35,9 +46,8 @@ init url = State
   { title: config.title
   , route: match url
   , currentUser: Nothing
-  --, lists: Success (testList : Nil)
   , lists: NotAsked
-  , selectedList: Nothing
+  , selectedListId: Nothing
   , newListName: ""
   , newItemName: ""
   }

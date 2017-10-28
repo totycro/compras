@@ -34,6 +34,13 @@ instance remoteDataFunctor :: Functor (RemoteData e) where
   map f (Failure e) = Failure e
   map f Loading = Loading
 
+remoteDataToMaybe :: forall e a. RemoteData e a -> Maybe a
+remoteDataToMaybe (Success e) = Just e
+remoteDataToMaybe NotAsked = Nothing
+remoteDataToMaybe (Failure e) = Nothing
+remoteDataToMaybe Loading = Nothing
+
+
 data GenericLoadingError
   = Err String
 
