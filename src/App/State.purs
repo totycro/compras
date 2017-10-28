@@ -2,37 +2,29 @@ module App.State where
 
 import Prelude
 
-import Data.Argonaut
-import Data.Traversable
-
 import App.Config (config)
-import App.Routes (Route, match)
-import App.Types (ShoppingList(..), User, RemoteData(..), GenericLoadingError(..), ShoppingListId, remoteDataToMaybe)
+import App.Routes
+import App.Types
 
 import Data.List (List(..), (:), fromFoldable, head, filter)
-import Data.Maybe (Maybe(..), fromJust)
-import Data.DateTime (DateTime(..))
-import Data.Date (canonicalDate,  Month(..))
-import Data.Time (Time(..))
-import Data.Either (Either(..), either)
+import Data.Maybe (Maybe(..))
 
-import Partial.Unsafe (unsafePartial)
-import Data.Enum (toEnum)
 
 newtype State = State
   { title :: String
-  , route :: Route
-  , currentUser :: Maybe User
+  , route :: MainRoute
   , lists :: RemoteData GenericLoadingError (List ShoppingList)
-  , selectedListId :: Maybe ShoppingListId
   , newListName :: String
   , newItemName :: String
+  , currentUser :: Maybe User
   }
 
 
 getSelectedList :: State -> Maybe ShoppingList
 getSelectedList (State st) = do
-  slId <- st.selectedListId
+  slId <- case st.route of
+    LoggedIn (Detail slId) -> Just slId
+    _ -> Nothing
   lists <- (remoteDataToMaybe st.lists)
   selectedList <- filterLists lists slId
   pure selectedList
@@ -44,11 +36,9 @@ getSelectedList (State st) = do
 init :: String -> State
 init url = State
   { title: config.title
-  , route: match url
-  , currentUser: Nothing
+  , route: Home
   , lists: NotAsked
-  , selectedListId: Nothing
   , newListName: ""
   , newItemName: ""
+  , currentUser: Nothing
   }
-

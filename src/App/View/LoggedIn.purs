@@ -4,6 +4,7 @@ import Prelude hiding (div)
 
 import App.Events (Event(..))
 import App.State
+import App.Routes
 import App.Types
 import Data.Maybe (Maybe(..))
 import Data.List (List)
@@ -34,7 +35,7 @@ centralView :: RemoteData GenericLoadingError (List ShoppingList) -> Maybe Shopp
 centralView shoppingLists (Just sl) newItemName = div do
    button
      ! Attributes.className "btn btn-secondary mb-3"
-     #! onClick (ShoppingListSelected Nothing)
+     #! onClick (const $ PageView (LoggedIn Overview))
      $ text "back"
    showSelectedList sl newItemName
 centralView shoppingLists Nothing _ = showLists shoppingLists
@@ -83,8 +84,8 @@ showListInOverview (ShoppingList shoppingList) =
   div do
     a
       -- ! style "cursor: pointer"
-      ! Attributes.href "#"
-      #! onClick (ShoppingListSelected $ Just $ ShoppingList shoppingList)
+      ! Attributes.href "javascript:void(0);"
+      #! onClick (const $ PageView $ LoggedIn $ Detail shoppingList.id)
       $ text $ "list: " <> shoppingList.name
 
 

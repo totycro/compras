@@ -5,13 +5,14 @@ import Prelude (const)
 import App.Events (Event(..))
 import App.State (State(..))
 import App.Types (User(..))
+import App.Routes (MainRoute(..), LoggedInSubRoute(..))
 import Control.Bind (discard)
 import Data.Function (($))
 import Data.Foldable
-import Data.List (List(..), (:), foldl)
+import Data.List (List(..), (:))
 import Pux.DOM.HTML (HTML)
 import Pux.DOM.Events (onClick)
-import Text.Smolder.HTML (a, div, h1, button)
+import Text.Smolder.HTML ( div, h1, button)
 import Text.Smolder.HTML.Attributes (className, style)
 import Text.Smolder.Markup ((#!), (!), text)
 -- import Text.Smolder.Markup (MarkupM(..), Markup)
@@ -20,7 +21,11 @@ import Text.Smolder.Markup ((#!), (!), text)
 
 renderUserSelectionButton :: User -> HTML Event
 renderUserSelectionButton (User u) = 
-     button ! className "btn btn-primary" ! style "margin: 4px" #! onClick (const $ UserSelected (User u)) $ text u.name
+     button
+      ! className "btn btn-primary"
+      ! style "margin: 4px"
+      #! onClick (const $ UserLoggedIn $ (User u))
+      $ text u.name
 
 view :: State -> HTML Event
 view (State st) =

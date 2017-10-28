@@ -1,46 +1,40 @@
 module App.Events where
 
-import Prelude hiding (div)
-
-import Data.Argonaut (class DecodeJson, decodeJson, (.?), (:=), (~>), jsonEmptyObject)
-import Control.Monad.Aff (attempt)
-import App.Routes (Route(..), toURL)
 import App.State
 import App.Types
-import Data.Function (($))
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.List (List(..), (:), head, snoc)
-import Data.Either (Either(..), either)
-import Network.HTTP.Affjax (AJAX, get, patch, post)
-import Pux (EffModel, noEffects)
-import Control.Applicative (pure)
+import Data.Tuple
+
+import App.Routes (LoggedInSubRoute(..), MainRoute(..), toURL)
+import Control.Monad.Aff (attempt)
 import Control.Monad.Eff.Class (liftEff)
-import DOM.HTML (window)
 import DOM (DOM)
+import DOM.HTML (window)
 import DOM.HTML.History (DocumentTitle(..), URL(..), pushState)
 import DOM.HTML.Types (HISTORY)
 import DOM.HTML.Window (history)
+import Data.Argonaut (class DecodeJson, decodeJson, (.?), (:=), (~>), jsonEmptyObject)
+import Data.Either (Either(..), either)
 import Data.Foreign (toForeign)
-import DOM.Event.Event (preventDefault)
-import Pux.DOM.Events (DOMEvent)
-import Data.Tuple
+import Data.List (List(..), (:), head, snoc)
+import Data.Maybe (Maybe(..), fromMaybe)
+import Network.HTTP.Affjax (AJAX, get, patch, post)
+import Prelude hiding (div)
+import Pux (EffModel, noEffects)
 
 
-data Event 
-  = PageView Route 
-  | UserSelected User
+data Event
+  = PageView MainRoute
+  | UserLoggedIn User
   | RequestShoppingLists
   | ReceiveShoppingLists (Either String (List ShoppingList))
   | RequestToggleBoughtState ItemId Boolean
   | ReceiveToggleBoughtState (Either String { id :: ItemId, bought :: Boolean })
-  | ShoppingListSelected (Maybe ShoppingList) DOMEvent
   | ChangeNewListName String
   | AddNewList
   | ReceiveNewShoppingList (Either String ShoppingList)
   | ChangeNewItemName String
   | AddNewItem ShoppingListId
   | ReceiveNewItem (Either String (Tuple ShoppingListId Item))
-
 
 
 type AppEffects fx = (ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
@@ -55,27 +49,28 @@ instance toggleBoughtStateResponseDecodeJson :: DecodeJson (ToggleBoughtStateRes
      pure $ ToggleBoughtStateResponse { bought: bought }
 
 
-navigateTo r = do
+setBrowserUrl r = do
    liftEff do
       h <- history =<< window
       pushState (toForeign {}) (DocumentTitle "") (URL $ toURL r) h
-   pure (Just (PageView r))
+   pure Nothing
 
 
 foldp :: ∀ fx. Event -> State -> EffModel State Event (AppEffects fx)
-foldp (PageView route) (State st) =
-	noEffects $ State st { route = route }
+foldp (PageView (NotFound url)) (State st) =
+	noEffects $ State st { route = NotFound url}
+foldp (PageView Home) (State st) =
+	{ state: State st { route = Home}
+  , effects: [ setBrowserUrl Home ]
+  }
+foldp (PageView (LoggedIn subRoute)) (State st) =
+  { state: State st { route = LoggedIn subRoute }
+  , effects: [ setBrowserUrl (LoggedIn subRoute) ]
+  }
 
-foldp (UserSelected u) (State st) =
-  { state: State st { currentUser = Just u }
-  , effects: [ navigateTo LoggedIn ]   }
-
-foldp (ShoppingListSelected maybeSl ev) (State st) =
-  { state:  State st { selectedListId = (\(ShoppingList sl) -> sl.id) <$>  maybeSl }
-  , effects: [ do
-      liftEff (preventDefault ev)
-      pure Nothing
-  ]
+foldp (UserLoggedIn user) (State st) =
+  { state: State st { currentUser = Just user }
+  , effects: [ pure $ Just $ PageView $ LoggedIn Overview ]
   }
 
 foldp (ChangeNewListName newListName) (State st) =
