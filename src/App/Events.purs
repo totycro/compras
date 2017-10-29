@@ -65,7 +65,12 @@ foldp (PageView Home) (State st) =
   }
 foldp (PageView (LoggedIn subRoute)) (State st) =
   { state: State st { route = LoggedIn subRoute }
-  , effects: [ setBrowserUrl (LoggedIn subRoute) ]
+  , effects:
+    [ setBrowserUrl (LoggedIn subRoute)
+    , case st.lists of
+        NotAsked -> pure $ Just RequestShoppingLists
+        _ -> pure Nothing
+    ]
   }
 
 foldp (UserLoggedIn user) (State st) =

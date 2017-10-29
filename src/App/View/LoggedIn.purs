@@ -25,8 +25,6 @@ view :: State -> HTML Event
 view (State st) =
   div do
     h1 $ text ( "Bienvenid@ " <> (getUserName st.currentUser))
-    div do
-      button ! Attributes.className "btn btn-primary" #! onClick (const RequestShoppingLists) $ text "load"
     centralView st.lists (getSelectedList (State st)) st.newItemName
     showAddNewList st.newListName
 
@@ -66,17 +64,24 @@ disableIfStringEmpty _ x = x
 
 
 createCheckbox :: Boolean -> HTML Event
-createCheckbox value = input ! Attributes.type' "checkbox" ! Attributes.checked (if value then "checked" else "" )
+createCheckbox value =
+  input
+  ! Attributes.type' "checkbox"
+  ! Attributes.checked (if value then "checked" else "" )
 
 
 showLists :: RemoteData GenericLoadingError (List ShoppingList) -> HTML Event
 showLists (Success listList) =
-  div do
-    span $ text "loaded"
-    div $ for_ listList showListInOverview
-showLists NotAsked = span $ text "Lists not loading yet"
-showLists Loading = span $ text "Loading"
-showLists (Failure e) = span $ text $ "Error while loading:" <> show e
+  for_ listList showListInOverview
+showLists NotAsked = span $ text "Lists not loading yet"  -- now due to autoloading, this shouldn't occur
+showLists Loading = span $ text "Loading ..."
+showLists (Failure e) = do
+  div $ text $ "Error while loading:" <> show e
+  button
+    ! Attributes.className "btn btn-primary"
+    #! onClick (const RequestShoppingLists)
+    $ text "reload"
+
 
 
 showListInOverview :: ShoppingList -> HTML Event
