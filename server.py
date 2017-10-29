@@ -27,7 +27,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 [
                     {
                         'id': next(unique_id_sequence),
-                        'name': "cositas 1",
+                        'name': "cositas para la casa",
                         'items':[
                             {
                                 'id': next(unique_id_sequence),
@@ -72,7 +72,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     },
                     {
                         'id': next(unique_id_sequence),
-                        'name': "cositas 2",
+                        'name': "cositas para comer",
                         'items': [],
                     }
                 ],

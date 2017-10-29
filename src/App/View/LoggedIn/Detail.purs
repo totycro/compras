@@ -53,9 +53,9 @@ showSelectedList (ShoppingList sl) newItemName = div do
 
 showList :: ShoppingList -> HTML Event -> HTML Event
 showList (ShoppingList shoppingList) transclusion =
-  div ! Attributes.className "card mb-3" $ do
+  div ! Attributes.className "card" $ do
      div ! Attributes.className "card-body" $ do
-       h3 ! Attributes.className "card-title" $ text shoppingList.name
+       h2 ! Attributes.className "card-title text-info" $ text shoppingList.name
        ul ! Attributes.className "list-unstyled" $ for_ shoppingList.items showItem
        transclusion
 

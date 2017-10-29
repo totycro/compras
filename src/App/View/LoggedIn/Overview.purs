@@ -1,20 +1,19 @@
 module App.View.LoggedIn.Overview where
 
 import App.Routes
-import App.State (State(..))
 import App.Types
-import Text.Smolder.HTML
-
 import App.Events (Event(..))
+import App.State (State(..))
+import App.View.LoggedIn (disableIfStringEmpty)
 import Data.Foldable (for_)
-import Data.List (List)
+import Data.List (List, length)
 import Data.Maybe (Maybe(..))
 import Prelude hiding (div)
 import Pux.DOM.Events (onClick, onChange, onInput, targetValue)
 import Pux.DOM.HTML (HTML)
+import Text.Smolder.HTML hiding (map)
 import Text.Smolder.HTML.Attributes as Attributes
-import Text.Smolder.Markup ((#!), (!), text, class Attributable)
-import App.View.LoggedIn (disableIfStringEmpty)
+import Text.Smolder.Markup ((#!), (!), text)
 
 
 getUserName :: Maybe User -> String
@@ -46,7 +45,8 @@ showAddNewList newListName = div $ do
 
 showLists :: RemoteData GenericLoadingError (List ShoppingList) -> HTML Event
 showLists (Success listList) =
-  for_ listList showListInOverview
+  ul ! Attributes.className "list-unstyled p-2" $ do
+    for_ listList showListInOverview
 showLists NotAsked = span $ text "Listas todavía no están cargando"  -- now due to autoloading, this shouldn't occur
 showLists Loading = span $ text "Cargando ..."
 showLists (Failure e) = do
@@ -59,8 +59,13 @@ showLists (Failure e) = do
 
 showListInOverview :: ShoppingList -> HTML Event
 showListInOverview (ShoppingList shoppingList) =
-  div do
-    a
-      ! Attributes.href "javascript:void(0);"
+  li ! Attributes.className "my-2" $do
+    button
+      ! Attributes.className "btn btn-info"
       #! onClick (const $ PageView $ LoggedIn $ Detail shoppingList.id)
-      $ text $ "lista: " <> shoppingList.name
+      $ do
+        span
+          $ text ("lista: " <> shoppingList.name)
+        span
+          ! Attributes.className "badge badge-light ml-1"
+          $ text (show (length shoppingList.items))
