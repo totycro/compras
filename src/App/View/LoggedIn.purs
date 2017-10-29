@@ -127,7 +127,5 @@ showItem (Item item) = li do
     span ! Attributes.className "input-group-addon" $
       createCheckbox item.bought
     span
-      ! Attributes.className "form-control form-control-plaintext"
-      -- TODO: extract to proper css style class ("span with input-like border")
-      ! Attributes.style "color: black; border-color: rgb(206, 212, 218); border-style: solid ; border-width: 1px;"
+      ! Attributes.className "form-control form-control-plaintext span-with-border"
       $ text item.name
