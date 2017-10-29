@@ -3,7 +3,7 @@ module App.View.Layout where
 import CSS
 
 import App.Events (Event)
-import App.Routes (MainRoute(..))
+import App.Routes
 import App.State (State(..))
 import App.View.Homepage as Homepage
 import App.View.LoggedIn as LoggedIn
@@ -27,7 +27,8 @@ view (State st) =
 
     case st.route of
       (Home) -> Homepage.view (State st)
-      (LoggedIn _) -> LoggedIn.view (State st)
+      (LoggedIn Overview) -> LoggedIn.overviewView (State st)
+      (LoggedIn (Detail _)) -> LoggedIn.detailView (State st)
       (NotFound url) -> NotFound.view (State st)
 
 css :: CSS

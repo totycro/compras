@@ -1,19 +1,20 @@
 module App.View.LoggedIn where
 
-import Prelude hiding (div)
+import App.Routes
+import App.State
+import App.Types
+import Text.Smolder.HTML
 
 import App.Events (Event(..))
-import App.State
-import App.Routes
-import App.Types
-import Data.Maybe (Maybe(..))
+import CSS (offset)
+import Data.Foldable (for_)
 import Data.List (List)
-import Pux.DOM.HTML (HTML)
+import Data.Maybe (Maybe(..))
+import Prelude hiding (div)
 import Pux.DOM.Events (onClick, onChange, onInput, targetValue)
-import Text.Smolder.HTML
+import Pux.DOM.HTML (HTML)
 import Text.Smolder.HTML.Attributes as Attributes
 import Text.Smolder.Markup ((#!), (!), text, class Attributable)
-import Data.Foldable (for_)
 
 
 getUserName :: Maybe User -> String
@@ -21,22 +22,22 @@ getUserName maybeUser = case maybeUser of
   Just (User user) -> user.name
   Nothing -> ""
 
-view :: State -> HTML Event
-view (State st) =
+overviewView :: State -> HTML Event
+overviewView (State st) =
   div do
     h1 $ text ( "Bienvenid@ " <> (getUserName st.currentUser))
-    centralView st.lists (getSelectedList (State st)) st.newItemName
+    showLists st.lists
     showAddNewList st.newListName
 
-
-centralView :: RemoteData GenericLoadingError (List ShoppingList) -> Maybe ShoppingList -> String -> HTML Event
-centralView shoppingLists (Just sl) newItemName = div do
-   button
-     ! Attributes.className "btn btn-secondary mb-3"
-     #! onClick (const $ PageView (LoggedIn Overview))
-     $ text "back"
-   showSelectedList sl newItemName
-centralView shoppingLists Nothing _ = showLists shoppingLists
+detailView :: State -> HTML Event
+detailView (State st) = div $ do
+  button
+    ! Attributes.className "btn btn-secondary mb-3"
+    #! onClick (const $ PageView (LoggedIn Overview))
+    $ text "back"
+  case (getSelectedList (State st)) of
+    Just sl -> showSelectedList sl st.newItemName
+    Nothing -> span $ text "Error loading shopping list"
 
 
 -- TODO: datetime serialization
