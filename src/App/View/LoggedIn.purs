@@ -55,7 +55,7 @@ showAddNewList newListName = div $ do
         ! Attributes.value newListName
         #! onInput (\ev -> ChangeNewListName $ targetValue ev)
       (disableIfStringEmpty newListName button)
-        ! Attributes.className "btn btn-primary ml-2"
+        ! Attributes.className "btn btn-primary ml-1"
         #! onClick (const AddNewList) $ text "add"
 
 disableIfStringEmpty :: forall ta. Attributable ta => String -> ta -> ta
@@ -105,7 +105,7 @@ showSelectedList (ShoppingList sl) newItemName = div do
           ! Attributes.value newItemName
           #! onChange (\ev -> ChangeNewItemName $ targetValue ev)
         (disableIfStringEmpty newItemName button )
-          ! Attributes.className "btn btn-primary ml-2"
+          ! Attributes.className "btn btn-primary ml-1"
           #! onClick (const $ AddNewItem sl.id) $ text "add"
   )
 
