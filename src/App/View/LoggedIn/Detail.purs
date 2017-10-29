@@ -22,10 +22,10 @@ view (State st) = div $ do
   button
     ! Attributes.className "btn btn-secondary mb-3"
     #! onClick (const $ PageView (LoggedIn Overview))
-    $ text "back"
+    $ text "regresar"
   case (getSelectedList (State st)) of
     Just sl -> showSelectedList sl st.newItemName
-    Nothing -> span $ text "Error loading shopping list"
+    Nothing -> span $ text "Error mientras cargar lista de compras"
 
 
 -- TODO: datetime serialization
@@ -38,7 +38,7 @@ view (State st) = div $ do
 showSelectedList :: ShoppingList -> String -> HTML Event
 showSelectedList (ShoppingList sl) newItemName = div do
   showList (ShoppingList sl) ( div do
-    h5 $ text "Add new item to list"
+    h5 $ text "Añadir artículo a la lista"
     form ! Attributes.className "form-inline" $ do
       div ! Attributes.className "form-group" $ do
         input
@@ -47,7 +47,7 @@ showSelectedList (ShoppingList sl) newItemName = div do
           #! onChange (\ev -> ChangeNewItemName $ targetValue ev)
         (disableIfStringEmpty newItemName button )
           ! Attributes.className "btn btn-primary ml-1"
-          #! onClick (const $ AddNewItem sl.id) $ text "add"
+          #! onClick (const $ AddNewItem sl.id) $ text "añadir"
   )
 
 

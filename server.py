@@ -27,11 +27,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 [
                     {
                         'id': next(unique_id_sequence),
-                        'name': "Zeugs 1",
+                        'name': "cositas 1",
                         'items':[
                             {
                                 'id': next(unique_id_sequence),
-                                'name': 'Gurke',
+                                'name': 'pepinos 1',
                                 'addedBy': {
                                 'name': 'Moni',
                                 },
@@ -40,7 +40,27 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                             },
                             {
                                 'id': next(unique_id_sequence),
-                                'name': 'Gurke2',
+                                'name': 'pepinos 2',
+                                'addedBy': {
+                                'name': 'Moni',
+                                },
+                                # 'buyAt': [ 'Hofer', 'Billa' ],
+                                'buyAt': [],
+                                'bought': True,
+                            },
+                            {
+                                'id': next(unique_id_sequence),
+                                'name': 'calabacín',
+                                'addedBy': {
+                                'name': 'Moni',
+                                },
+                                # 'buyAt': [ 'Hofer', 'Billa' ],
+                                'buyAt': [],
+                                'bought': False,
+                            },
+                            {
+                                'id': next(unique_id_sequence),
+                                'name': 'dulcítas',
                                 'addedBy': {
                                 'name': 'Moni',
                                 },
@@ -52,7 +72,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     },
                     {
                         'id': next(unique_id_sequence),
-                        'name': "Zeugs 2",
+                        'name': "cositas 2",
                         'items': [],
                     }
                 ],

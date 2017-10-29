@@ -32,7 +32,7 @@ view (State st) =
 
 showAddNewList :: String -> HTML Event
 showAddNewList newListName = div $ do
-  h5 ! Attributes.className "mt-4" $ text "Add new list"
+  h5 ! Attributes.className "mt-4" $ text "Añadir nueva list"
   form ! Attributes.className "form-inline" $ do
     div ! Attributes.className "form-group" $ do
       input
@@ -41,20 +41,20 @@ showAddNewList newListName = div $ do
         #! onInput (\ev -> ChangeNewListName $ targetValue ev)
       (disableIfStringEmpty newListName button)
         ! Attributes.className "btn btn-primary ml-1"
-        #! onClick (const AddNewList) $ text "add"
+        #! onClick (const AddNewList) $ text "añadir"
 
 
 showLists :: RemoteData GenericLoadingError (List ShoppingList) -> HTML Event
 showLists (Success listList) =
   for_ listList showListInOverview
-showLists NotAsked = span $ text "Lists not loading yet"  -- now due to autoloading, this shouldn't occur
-showLists Loading = span $ text "Loading ..."
+showLists NotAsked = span $ text "Listas todavía no están cargando"  -- now due to autoloading, this shouldn't occur
+showLists Loading = span $ text "Cargando ..."
 showLists (Failure e) = do
-  div $ text $ "Error while loading:" <> show e
+  div $ text $ "Error mientras cargando:" <> show e
   button
     ! Attributes.className "btn btn-primary"
     #! onClick (const RequestShoppingLists)
-    $ text "reload"
+    $ text "cargar de nuevo"
 
 
 showListInOverview :: ShoppingList -> HTML Event
@@ -63,4 +63,4 @@ showListInOverview (ShoppingList shoppingList) =
     a
       ! Attributes.href "javascript:void(0);"
       #! onClick (const $ PageView $ LoggedIn $ Detail shoppingList.id)
-      $ text $ "list: " <> shoppingList.name
+      $ text $ "lista: " <> shoppingList.name
