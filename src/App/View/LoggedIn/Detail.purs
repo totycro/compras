@@ -14,7 +14,7 @@ import Prelude hiding (div)
 import Pux.DOM.Events (onClick, onChange, onInput, targetValue)
 import Pux.DOM.HTML (HTML)
 import Text.Smolder.HTML.Attributes as Attributes
-import Text.Smolder.Markup ((#!), (!), text, class Attributable)
+import Text.Smolder.Markup ((#!), (!), text)
 import App.View.LoggedIn (disableIfStringEmpty, createCheckbox)
 
 view :: State -> HTML Event
@@ -64,9 +64,12 @@ showItem :: Item -> HTML Event
 showItem (Item item) = li do
   -- using labels for the checkbox would be the most standard and accessible way,
   -- however it screws up bootstrap styling. so we just make everything clickable here
-  div ! Attributes.className "input-group" #! onClick (const $ RequestToggleBoughtState item.id (not item.bought)) $ do
-    span ! Attributes.className "input-group-addon" $
-      createCheckbox item.bought
-    span
-      ! Attributes.className "form-control form-control-plaintext span-with-border"
-      $ text item.name
+  div
+    ! Attributes.className "input-group"
+    #! onClick (const $ RequestToggleBoughtState item.id (not item.bought))
+    $ do
+      span ! Attributes.className "input-group-addon" $
+        createCheckbox item.bought
+      span
+        ! Attributes.className ( "form-control form-control-plaintext span-with-border " <> (if item.bought then "text-muted" else "") )
+        $ text item.name
