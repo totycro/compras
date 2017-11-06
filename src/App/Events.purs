@@ -5,7 +5,7 @@ import App.Types
 import Data.Tuple
 
 import App.Routes (LoggedInSubRoute(..), MainRoute(..), toURL)
-import Control.Monad.Aff (attempt)
+import Control.Monad.Aff (attempt, delay)
 import Control.Monad.Eff.Class (liftEff)
 import DOM (DOM)
 import DOM.HTML (window)
@@ -20,7 +20,13 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Network.HTTP.Affjax (AJAX, get, patch, post)
 import Prelude hiding (div)
 import Pux (EffModel, noEffects)
+import Data.Time.Duration (Milliseconds(..))
+import Data.Int (toNumber)
+import Data.List (sortBy)
 
+
+
+-- TODO: refactor to multiple components: e.g. lists, items
 
 data Event
   = PageView MainRoute
@@ -35,6 +41,7 @@ data Event
   | ChangeNewItemName String
   | AddNewItem ShoppingListId
   | ReceiveNewItem (Either String (Tuple ShoppingListId Item))
+  | MoveItemToBottomOfList ItemId
 
 
 type AppEffects fx = (ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
@@ -150,25 +157,50 @@ foldp (RequestToggleBoughtState itemId newBoughtState) (State st) =
    ]
    }
 
+-- TODO: refactor such that this is only applied on loaded lists
 foldp (ReceiveToggleBoughtState (Left err)) (State st) =
   noEffects $ State st  -- TODO: error handling
 foldp (ReceiveToggleBoughtState (Right result)) (State st @ { lists: Success loadedLists }) =
-  noEffects $ State st {
-    lists = Success newLists
+  { state: State st {
+      lists = Success (
+        updateItemInList loadedLists result.id \(Item item) -> Item item { bought = result.bought }
+      )
+    }
+    , effects: [
+      if result.bought then do
+        delay (Milliseconds $ toNumber 2000)
+        pure $ Just $ MoveItemToBottomOfList result.id
+      else do
+        -- TODO: move to bottom of unbought items?
+        pure Nothing
+    ]
   }
-  where
-        newLists = updateBoughtState loadedLists result.id result.bought
 foldp (ReceiveToggleBoughtState (Right result)) (State st) =
   noEffects $ State st
 
+-- TODO: refactor such that this is only applied on loaded lists
+foldp (MoveItemToBottomOfList itemId) (State st @ { lists: Success loadedLists}) =
+  noEffects $ State st { lists = Success $ updateList <$> loadedLists }
+  where
+    updateList :: ShoppingList -> ShoppingList
+    updateList (ShoppingList sl) = ShoppingList sl { items = sortBy cmp sl.items }
 
-updateBoughtState :: List ShoppingList -> ItemId -> Boolean -> List ShoppingList
-updateBoughtState shoppingLists itemId newBoughtState =
+    cmp :: Item -> Item -> Ordering
+    cmp (Item itemA@{ id: id }) (Item itemB) | id == itemId = GT
+    cmp (Item itemA) (Item itemB@{ id: id }) | id == itemId = LT
+    cmp (Item itemA) (Item itemB) = EQ
+
+foldp (MoveItemToBottomOfList itemId) (State st) =
+  noEffects $ State st
+
+
+updateItemInList :: List ShoppingList -> ItemId -> (Item -> Item) -> List ShoppingList
+updateItemInList shoppingLists itemId updateFun =
   map updateShoppingList shoppingLists
   where
         updateShoppingList :: ShoppingList -> ShoppingList
         updateShoppingList (ShoppingList sl) = ShoppingList sl { items = updateItem <$> sl.items }
 
         updateItem :: Item -> Item
-        updateItem (Item item@{ id: id }) | id == itemId = Item (item { bought = newBoughtState } )
+        updateItem item@(Item { id: id }) | id == itemId = updateFun item
         updateItem item = item
