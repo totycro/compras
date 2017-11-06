@@ -72,12 +72,13 @@ instance itemShow :: Show (Item) where
 
 
 type ShoppingListId = Int
-  
+
 newtype ShoppingList = ShoppingList
   { id :: ShoppingListId
   , name :: String
   , items :: List Item
   }
+
 
 instance shoppingListShow :: Show (ShoppingList) where
   show (ShoppingList sl) = "List " <> show sl.id <> ": " <> sl.name <> ": " <> show sl.items
@@ -87,14 +88,14 @@ instance decodeJsonUser :: DecodeJson (User) where
   decodeJson json = do
      obj <- decodeJson json
      name <- obj .? "name"
-     pure $ User { name: name } 
+     pure $ User { name: name }
 
 
 instance decodeJsonShop :: DecodeJson (Shop) where
   decodeJson json = do
      obj <- decodeJson json
      name <- obj .? "name"
-     pure $ Shop { name: name } 
+     pure $ Shop { name: name }
 
 
 instance decodeJsonItem :: DecodeJson (Item) where
@@ -126,13 +127,13 @@ instance decodeJsonShoppingList :: DecodeJson (ShoppingList) where
     name <- obj .? "name"
     id <- obj .? "id"
     pure $ ShoppingList { id: id, items: items , name: name }
-    where 
+    where
         arrayToItems :: Array Json -> Either String (List Item)
         arrayToItems o = fromFoldable <$> traverse decodeJson o
 
 
 testItem :: Item
-testItem = Item 
+testItem = Item
   { id: 5
   , name: "Zeug"
   , addedAt: DateTime someDay someTime
@@ -140,7 +141,7 @@ testItem = Item
   , addedBy: User { name: "test" }
   , buyAt: Nil
   , bought: false
-  } 
+  }
 
 someDay = unsafePartial fromJust $ canonicalDate <$> toEnum 2017 <*> (Just September) <*> toEnum 4
 someTime = unsafePartial $ fromJust $ Time <$> toEnum 17 <*> toEnum 2 <*> toEnum 16 <*> toEnum 362
@@ -150,4 +151,3 @@ someDateTime = DateTime someDay someTime
 
 testList :: ShoppingList
 testList = ShoppingList { id: 4, name: "TestList", items: (testItem:Nil) }
-

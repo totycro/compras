@@ -15,7 +15,7 @@ import Pux.DOM.Events (onClick, onChange, onInput, targetValue)
 import Pux.DOM.HTML (HTML)
 import Text.Smolder.HTML.Attributes as Attributes
 import Text.Smolder.Markup ((#!), (!), text)
-import App.View.LoggedIn (disableIfStringEmpty, createCheckbox)
+import App.View.Utils (disableIfStringEmpty)
 
 view :: State -> HTML Event
 view (State st) = div $ do
@@ -73,3 +73,10 @@ showItem (Item item) = li do
       span
         ! Attributes.className ( "form-control form-control-plaintext span-with-border " <> (if item.bought then "text-muted" else "") )
         $ text item.name
+
+
+createCheckbox :: Boolean -> HTML Event
+createCheckbox value =
+  input
+  ! Attributes.type' "checkbox"
+  ! Attributes.checked (if value then "checked" else "" )

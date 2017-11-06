@@ -23,6 +23,7 @@ import Pux (EffModel, noEffects)
 import Data.Time.Duration (Milliseconds(..))
 import Data.Int (toNumber)
 import Data.List (sortBy)
+import App.ListsComponent as ListsComponent
 
 
 
@@ -42,6 +43,7 @@ data Event
   | AddNewItem ShoppingListId
   | ReceiveNewItem (Either String (Tuple ShoppingListId Item))
   | MoveItemToBottomOfList ItemId
+  | ListsComponentEvent ListsComponent.Event
 
 
 type AppEffects fx = (ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
@@ -140,9 +142,9 @@ foldp (RequestShoppingLists ) (State st) =
   ]
   }
 foldp (ReceiveShoppingLists (Left err)) (State st) =
-  noEffects $ State st { lists = Failure $ Err err }
+  noEffects $ State st { lists' = Failure $ Err err}
 foldp (ReceiveShoppingLists (Right result)) (State st) =
-  noEffects $ State st { lists = Success result }
+  noEffects $ State st { lists' = Success $ ListsComponent.init result}
 
 foldp (RequestToggleBoughtState itemId newBoughtState) (State st) =
   { state : State st
@@ -189,9 +191,11 @@ foldp (MoveItemToBottomOfList itemId) (State st @ { lists: Success loadedLists})
     cmp (Item itemA@{ id: id }) (Item itemB) | id == itemId = GT
     cmp (Item itemA) (Item itemB@{ id: id }) | id == itemId = LT
     cmp (Item itemA) (Item itemB) = EQ
-
 foldp (MoveItemToBottomOfList itemId) (State st) =
   noEffects $ State st
+
+foldp (ListsComponentEvent ev) (State st) =
+  noEffects $ State st  -- TODO: component events
 
 
 updateItemInList :: List ShoppingList -> ItemId -> (Item -> Item) -> List ShoppingList

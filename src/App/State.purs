@@ -8,6 +8,7 @@ import App.Types
 
 import Data.List (List(..), (:), fromFoldable, head, filter)
 import Data.Maybe (Maybe(..))
+import App.ListsComponent as ListsComponent
 
 
 newtype State = State
@@ -17,6 +18,7 @@ newtype State = State
   , newListName :: String
   , newItemName :: String
   , currentUser :: Maybe User
+  , lists' :: RemoteData GenericLoadingError ListsComponent.State
   }
 
 
@@ -41,4 +43,5 @@ init url = State
   , newListName: ""
   , newItemName: ""
   , currentUser: Nothing
+  , lists': NotAsked
   }
