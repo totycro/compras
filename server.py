@@ -40,16 +40,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                             },
                             {
                                 'id': next(unique_id_sequence),
-                                'name': 'pepinos 2',
-                                'addedBy': {
-                                'name': 'Moni',
-                                },
-                                # 'buyAt': [ 'Hofer', 'Billa' ],
-                                'buyAt': [],
-                                'bought': True,
-                            },
-                            {
-                                'id': next(unique_id_sequence),
                                 'name': 'calabacín',
                                 'addedBy': {
                                 'name': 'Moni',
@@ -57,6 +47,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                                 # 'buyAt': [ 'Hofer', 'Billa' ],
                                 'buyAt': [],
                                 'bought': False,
+                            },
+                            {
+                                'id': next(unique_id_sequence),
+                                'name': 'pepinos 2',
+                                'addedBy': {
+                                'name': 'Moni',
+                                },
+                                # 'buyAt': [ 'Hofer', 'Billa' ],
+                                'buyAt': [],
+                                'bought': True,
                             },
                             {
                                 'id': next(unique_id_sequence),
