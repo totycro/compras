@@ -19,6 +19,7 @@ newtype State = State
   , newItemName :: String
   , currentUser :: Maybe User
   , lists' :: RemoteData GenericLoadingError ListsComponent.State
+  , error :: String
   }
 
 
@@ -44,4 +45,5 @@ init url = State
   , newItemName: ""
   , currentUser: Nothing
   , lists': NotAsked
+  , error: ""
   }

@@ -19,7 +19,7 @@ import Data.List (List(..), (:), head, snoc)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Network.HTTP.Affjax (AJAX, get, patch, post)
 import Prelude hiding (div)
-import Pux (EffModel, noEffects)
+import Pux (EffModel, noEffects, mapEffects, mapState)
 import Data.Time.Duration (Milliseconds(..))
 import Data.Int (toNumber)
 import Data.List (sortBy)
@@ -47,6 +47,7 @@ data Event
 
 
 type AppEffects fx = (ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
+
 
 -- TODO: get rid of this?
 newtype ToggleBoughtStateResponse = ToggleBoughtStateResponse { bought :: Boolean }
@@ -194,8 +195,16 @@ foldp (MoveItemToBottomOfList itemId) (State st @ { lists: Success loadedLists})
 foldp (MoveItemToBottomOfList itemId) (State st) =
   noEffects $ State st
 
+foldp (ListsComponentEvent ev) (State st @ { lists': Success listComponentState}) =
+  transformEvents $ transformState componentEffModel
+  where
+    transformEvents = mapEffects ListsComponentEvent
+    transformState =
+      mapState (\listsComponentState -> State st { lists' = Success listsComponentState})
+    componentEffModel = ListsComponent.foldp ev listComponentState
+
 foldp (ListsComponentEvent ev) (State st) =
-  noEffects $ State st  -- TODO: component events
+  noEffects $ State st { error = "ListComponentEvent cuando ListComponent no esta initialisado"}
 
 
 updateItemInList :: List ShoppingList -> ItemId -> (Item -> Item) -> List ShoppingList

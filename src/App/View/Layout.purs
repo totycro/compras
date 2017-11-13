@@ -16,12 +16,16 @@ import Data.Function (($), (#))
 import Pux.DOM.HTML (HTML, style)
 import Text.Smolder.HTML (div)
 import Text.Smolder.HTML.Attributes (className)
-import Text.Smolder.Markup ((!))
+import Text.Smolder.Markup ((!), text)
 
 view :: State -> HTML Event
 view (State st) =
   div ! className "app" $ do
     style css
+
+    case st.error of
+      "" -> text ""
+      msg -> div $ text msg
 
     case st.route of
       (Home) -> Homepage.view (State st)
