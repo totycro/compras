@@ -36,9 +36,6 @@ data Event
   | ReceiveShoppingLists (Either String (List ShoppingList))
   | RequestToggleBoughtState ItemId Boolean
   | ReceiveToggleBoughtState (Either String { id :: ItemId, bought :: Boolean })
-  | ChangeNewListName String
-  | AddNewList
-  | ReceiveNewShoppingList (Either String ShoppingList)
   | ChangeNewItemName String
   | AddNewItem ShoppingListId
   | ReceiveNewItem (Either String (Tuple ShoppingListId Item))
@@ -87,26 +84,6 @@ foldp (UserLoggedIn user) (State st) =
   { state: State st { currentUser = Just user }
   , effects: [ pure $ Just $ PageView $ LoggedIn Overview ]
   }
-
-foldp (ChangeNewListName newListName) (State st) =
-  noEffects $ State st { newListName = newListName }
-
-foldp (AddNewList) (State st) =
-  { state: State st { newListName = "" }
-  , effects: [ do
-    let requestJson = ("name" := st.newListName) ~> jsonEmptyObject
-    res <- attempt $ post "/api/list" requestJson
-    let decode r = decodeJson r.response :: Either String (ShoppingList)
-    let listResult = either (Left <<< show) decode res :: Either String (ShoppingList)
-    pure $ Just $ ReceiveNewShoppingList listResult
-  ]
-  }
--- TOOD: refactor such that new lists by design only can be created in parts of the program where we actually have loaded lists alread
-foldp (ReceiveNewShoppingList (Left err)) (State st) =
-  noEffects $ State st  -- TODO: error handling
-  -- TODO: add check in backend if list with name already exists and handle error here
-foldp (ReceiveNewShoppingList (Right newList)) (State st) =
-  noEffects $ State st { lists = (\lists -> snoc lists newList) <$> st.lists}
 
 foldp (ChangeNewItemName newItemName) (State st) =
   noEffects $ State st { newItemName = newItemName }
