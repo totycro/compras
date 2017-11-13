@@ -23,6 +23,7 @@ newtype State = State
   }
 
 
+{-
 getSelectedList :: State -> Maybe ShoppingList
 getSelectedList (State st) = do
   slId <- case st.route of
@@ -34,6 +35,7 @@ getSelectedList (State st) = do
   where
     filterLists :: List ShoppingList -> ShoppingListId -> Maybe ShoppingList
     filterLists lists listId = head $ filter (\(ShoppingList sl) -> sl.id == listId) lists
+    -}
 
 
 init :: String -> State

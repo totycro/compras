@@ -17,15 +17,20 @@ import Text.Smolder.HTML.Attributes as Attributes
 import Text.Smolder.Markup ((#!), (!), text)
 import App.View.Utils (disableIfStringEmpty)
 
+-- TODO: Refactor to components
+
 view :: State -> HTML Event
 view (State st) = div $ do
   button
     ! Attributes.className "btn btn-secondary mb-3"
     #! onClick (const $ PageView (LoggedIn Overview))
     $ text "regresar"
+  {-
+  -- TODO: move to listscomponent, doesn't compile as of now
   case (getSelectedList (State st)) of
     Just sl -> showSelectedList sl st.newItemName
     Nothing -> span $ text "Error mientras cargar lista de compras"
+  -}
 
 
 -- TODO: datetime serialization

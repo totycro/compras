@@ -1,4 +1,3 @@
-module App.Events where
 
 import App.State
 import App.Types

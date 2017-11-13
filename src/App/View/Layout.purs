@@ -29,8 +29,7 @@ view (State st) =
 
     case st.route of
       (Home) -> Homepage.view (State st)
-      (LoggedIn Overview) -> LoggedInOverview.view (State st)
-      (LoggedIn (Detail _)) -> LoggedInDetail.view (State st)
+      (LoggedIn subView) -> LoggedInOverview.view subView (State st)
       (NotFound url) -> NotFound.view (State st)
 
 css :: CSS
